@@ -72,3 +72,9 @@ Screenshot diambil setelah Apache XAMPP aktif dan halaman dibuka melalui alamat 
 ## Kesimpulan
 
 Seluruh contoh Pertemuan 1 dan Pertemuan 2 telah dijalankan tanpa error sintaks. Program kemudian dikembangkan dengan modifikasi pada logika, validasi, penerapan OOP, dan tampilan agar lebih fungsional serta mudah digunakan.
+
+## Lampiran Dokumentasi Sebelumnya
+
+Dokumentasi repository sebelumnya menyertakan contoh penggunaan array untuk menyimpan data identitas mahasiswa dalam struktur key-value. Struktur tersebut memudahkan pemanggilan data tertentu dan perulangan seluruh data.
+
+<img width="419" height="128" alt="Contoh biodata sebelumnya" src="https://github.com/user-attachments/assets/a7f83ef6-7618-409d-9d50-cf7c1589c267" />
