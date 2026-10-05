@@ -105,24 +105,24 @@ ADD COLUMN status_persetujuan ENUM('Pending', 'Disetujui', 'Ditolak') DEFAULT 'P
 4. Dokumen Screenshot Sebelum dan Sesudah Modifikasi 
     A. Modifikasi 1: Penambahan Kolom Email & Constraint pada mahasiswa & mata_kuliah
     Sebelum Modifikasi:
-    ![Screenshot 1](image.png)
-    ![Screenshot 2](image-1.png)
-    ![Screenshot 3](image-2.png)
-    ![Screenshot 4](image-3.png)
+    ![Screenshot 1](./image.png)
+    ![Screenshot 2](./image-1.png)
+    ![Screenshot 3](./image-2.png)
+    ![Screenshot 4](./image-3.png)
     Sesudah Modifikasi:
-    ![Screenshot 5](image-4.png)
-    ![Screenshot 6](image-5.png)
-    ![Screenshot 7](image-6.png)
-    ![Screenshot 8](image-7.png)
-    ![Screenshot 9](image-8.png)
-    ![Screenshot 10](image-9.png)
+    ![Screenshot 5](./image-4.png)
+    ![Screenshot 6](./image-5.png)
+    ![Screenshot 7](./image-6.png)
+    ![Screenshot 8](./image-7.png)
+    ![Screenshot 9](./image-8.png)
+    ![Screenshot 10](./image-9.png)
     B. Modifikasi 2: Penambahan Status Persetujuan & Constraint Semester pada krs
     Sebelum Modifikasi:
-    ![Screenshot 11](image-10.png)
-    ![Screenshot 12](image-11.png)
+    ![Screenshot 11](./image-10.png)
+    ![Screenshot 12](./image-11.png)
     Sesudah Modifikasi:
-    ![Screenshot 13](image-12.png)
-    ![Screenshot 14](image-13.png)
+    ![Screenshot 13](./image-12.png)
+    ![Screenshot 14](./image-13.png)
 
 5. Tuliskan satu error yang pernah muncul, penyebabnya, dan langkah perbaikannya.
     Pesan Error yang Muncul:
