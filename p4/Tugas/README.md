@@ -1,4 +1,4 @@
-﻿# Laporan Tugas Praktikum Basis Data - Manipulasi Data (DML) & Modifikasi Status KRS
+﻿# Laporan Tugas Praktikum PBW - Manipulasi Data (DML) & Modifikasi Status KRS
 
 Proyek ini berisi implementasi eksekusi kueri DML (Data Manipulation Language) meliputi `INSERT`, `SELECT`, `UPDATE`, `DELETE`, `GROUP BY`, serta manipulasi relasi tabel pada database **`akademik_one`** menggunakan phpMyAdmin (MySQL/MariaDB).
 
