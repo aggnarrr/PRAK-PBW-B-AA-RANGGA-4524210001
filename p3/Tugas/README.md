@@ -1,60 +1,190 @@
-﻿# Laporan Tugas Praktikum Pertemuan 3: Database Akademik
+﻿# Laporan Tugas Praktikum Basis Data - Database Akademik
 
-Tugas ini mempraktikkan kueri DDL (*Data Definition Language*) dan DML (*Data Manipulation Language*) pada database `akademik` menggunakan MySQL/MariaDB melalui phpMyAdmin. Berkas SQL hasil modifikasi tersedia di [`akademik_one_modifikasi_.sql`](./akademik_one_modifikasi_.sql).
+Proyek ini berisi implementasi eksekusi kueri DDL (Data Definition Language) dan DML (Data Manipulation Language) pada database **`akademik`** menggunakan phpMyAdmin (MySQL/MariaDB). Dokumen ini mencakup pembuatan struktur tabel dasar, penerapan integritas referensial, modifikasi skema tabel, penjelasan kode penting, penandaan screenshot, dan penanganan error.
 
-## 1. Eksekusi Program
+---
 
-Database akademik menggunakan tabel `mahasiswa`, `dosen`, `mata_kuliah`, dan `krs`. Skrip SQL mendefinisikan kolom, kunci utama, indeks unik, serta relasi foreign key untuk menjaga integritas data.
+## 1. Eksekusi Program Pertemuan 3
 
-## 2. Modifikasi Bermakna
+Proyek dijalankan pada database `akademik` yang mencakup 5 tabel utama: `mahasiswa`, `dosen`, `mata_kuliah`, `krs`, dan `nilai`. Semua kueri berhasil dieksekusi tanpa error kritis.
 
-1. **Validasi data mahasiswa dan mata kuliah:** menambahkan kolom email mahasiswa serta constraint untuk format email, tahun angkatan, dan rentang SKS.
-2. **Validasi pengambilan mata kuliah:** membatasi semester KRS pada rentang 1–14 dan menambahkan `status_persetujuan` dengan pilihan `Pending`, `Disetujui`, atau `Ditolak`.
+### A. Pembuatan Database & Tabel Utama (`mahasiswa`, `dosen`, `mata_kuliah`)
 
-## 3. Lima Bagian Kode Penting
+```sql
+CREATE DATABASE IF NOT EXISTS akademik
+CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE akademik;
 
-1. **Primary key** — `nim` menjadi identitas unik mahasiswa.
-2. **Foreign key** — relasi `krs` ke `mahasiswa` dan `mata_kuliah` menjaga agar KRS hanya merujuk data yang tersedia.
-3. **Check constraint** — `chk_sks` membatasi jumlah SKS pada rentang 1 sampai 6.
-4. **Unique constraint** — `uq_krs` mencegah mahasiswa mengambil mata kuliah yang sama dua kali pada semester dan tahun ajaran yang sama.
-5. **Default value** — status KRS otomatis bernilai `Pending` jika tidak ditentukan saat data dimasukkan.
+CREATE TABLE IF NOT EXISTS mahasiswa (
+    nim VARCHAR(15) PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    prodi VARCHAR(80) NOT NULL,
+    angkatan YEAR NOT NULL,
+    ipk DECIMAL(3,2) DEFAULT 0.00,
+    CONSTRAINT chk_ipk CHECK (ipk BETWEEN 0.00 AND 4.00)
+) ENGINE=InnoDB;
 
-## 4. Screenshot Sebelum dan Sesudah Modifikasi
+CREATE TABLE IF NOT EXISTS dosen (
+    nidn VARCHAR(20) PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    email VARCHAR(120) UNIQUE
+) ENGINE=InnoDB;
 
-### Modifikasi 1: Kolom email dan validasi mahasiswa/mata kuliah
+CREATE TABLE IF NOT EXISTS mata_kuliah (
+    kode_mk VARCHAR(12) PRIMARY KEY,
+    nama_mk VARCHAR(100) NOT NULL,
+    sks TINYINT UNSIGNED NOT NULL,
+    nidn VARCHAR(20),
+    CONSTRAINT fk_mk_dosen FOREIGN KEY (nidn)
+        REFERENCES dosen(nidn)
+        ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB;
 
-**Sebelum**
+CREATE TABLE IF NOT EXISTS krs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nim VARCHAR(15) NOT NULL,
+    kode_mk VARCHAR(12) NOT NULL,
+    semester TINYINT UNSIGNED NOT NULL,
+    tahun_ajaran VARCHAR(9) NOT NULL,
+    nilai_huruf CHAR(2) NULL,
+    CONSTRAINT uq_krs UNIQUE (nim, kode_mk, semester, tahun_ajaran),
+    CONSTRAINT fk_krs_mahasiswa FOREIGN KEY (nim)
+        REFERENCES mahasiswa(nim)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_krs_mk FOREIGN KEY (kode_mk)
+        REFERENCES mata_kuliah(kode_mk)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB;
+```
 
-![Screenshot 1](./image.png)
-![Screenshot 2](./image-1.png)
-![Screenshot 3](./image-2.png)
-![Screenshot 4](./image-3.png)
+## 2. Modifikasi Program (Dua Modifikasi Bermakna)
 
-**Sesudah**
+### Modifikasi 1: Penambahan Field & Validasi pada Tabel `mahasiswa` dan `mata_kuliah`
 
-![Screenshot 5](./image-4.png)
-![Screenshot 6](./image-5.png)
-![Screenshot 7](./image-6.png)
-![Screenshot 8](./image-7.png)
-![Screenshot 9](./image-8.png)
-![Screenshot 10](./image-9.png)
+```sql
+-- Penambahan Kolom Email
+ALTER TABLE mahasiswa
+ADD COLUMN email VARCHAR(120) AFTER nama;
 
-### Modifikasi 2: Status persetujuan dan validasi semester KRS
+-- Penambahan Constraint Validasi Email & Angkatan
+ALTER TABLE mahasiswa
+ADD CONSTRAINT chk_email_mahasiswa CHECK (email LIKE '%@%.%'),
+ADD CONSTRAINT chk_angkatan CHECK (angkatan >= 2015);
 
-**Sebelum**
+-- Penambahan Constraint Validasi SKS
+ALTER TABLE mata_kuliah
+ADD CONSTRAINT chk_sks CHECK (sks BETWEEN 1 AND 6);
+```
 
-![Screenshot 11](./image-10.png)
-![Screenshot 12](./image-11.png)
+### Modifikasi 2: Penambahan Batasan Semester & Kolom Status pada Tabel `krs`
 
-**Sesudah**
+Memastikan input semester berada pada rentang wajar (1–14) dan menambahkan kolom `status_persetujuan` dengan tipe `ENUM`.
 
-![Screenshot 13](./image-12.png)
-![Screenshot 14](./image-13.png)
+```sql
+ALTER TABLE krs
+ADD CONSTRAINT chk_semester CHECK (semester BETWEEN 1 AND 14),
+ADD COLUMN status_persetujuan ENUM('Pending', 'Disetujui', 'Ditolak') DEFAULT 'Pending';
+```
 
-## 5. Error, Penyebab, dan Perbaikan
+## 3. Penjelasan 5 Bagian Kode
 
-**Pesan error:** `#1050 - Table 'krs' already exists`.
+1. **PRIMARY KEY**
 
-**Penyebab:** tabel `krs` sudah ada di database sehingga perintah pembuatan tabel dengan nama yang sama ditolak.
+   Potongan kode: `nim VARCHAR(15) PRIMARY KEY`
 
-**Perbaikan:** gunakan `CREATE TABLE IF NOT EXISTS krs` agar kueri aman dijalankan ulang. Jika perlu membuat ulang tabel, hapus tabel lama terlebih dahulu dengan `DROP TABLE IF EXISTS krs`.
+   Digunakan sebagai identitas unik untuk setiap baris data dalam tabel agar tidak ada data ganda (misalnya NIM mahasiswa atau Kode MK).
+
+2. **FOREIGN KEY (Integritas Referensial)**
+
+   Potongan kode:
+
+   ```sql
+   CONSTRAINT fk_krs_mahasiswa FOREIGN KEY (nim) REFERENCES mahasiswa(nim)
+       ON UPDATE CASCADE ON DELETE CASCADE
+   ```
+
+   Menghubungkan tabel `krs` dengan tabel `mahasiswa`. Klausa `ON UPDATE CASCADE` dan `ON DELETE CASCADE` memastikan jika data NIM di tabel induk berubah atau dihapus, data terkait di tabel `krs` akan otomatis menyesuaikan atau terhapus.
+
+3. **CHECK CONSTRAINT (Validasi Data Input)**
+
+   Potongan kode: `CONSTRAINT chk_sks CHECK (sks BETWEEN 1 AND 6)`
+
+   Membatasi input data di tingkat database agar hanya nilai SKS antara 1 sampai 6 yang bisa disimpan, mencegah masuknya data bernilai salah atau di luar batas wajar.
+
+4. **UNIQUE CONSTRAINT (Pencegahan Duplikasi Kombinasi)**
+
+   Potongan kode: `CONSTRAINT uq_krs UNIQUE (nim, kode_mk, semester, tahun_ajaran)`
+
+   Mencegah seorang mahasiswa mengambil mata kuliah yang sama lebih dari satu kali dalam semester dan tahun ajaran yang sama.
+
+5. **TRIGGER (Otomatisasi Logika Bisnis)**
+
+   Potongan kode:
+
+   ```sql
+   CREATE TRIGGER trg_auto_nilai_huruf_insert
+   BEFORE INSERT ON nilai FOR EACH ROW
+   BEGIN
+       IF NEW.nilai_angka >= 85 THEN SET NEW.nilai_huruf = 'A';
+       -- ...
+   END;
+   ```
+
+   Mengotomatiskan pengisian kolom `nilai_huruf` berdasarkan rentang `nilai_angka` secara langsung saat proses `INSERT` data nilai.
+
+## 4. Dokumen Screenshot Sebelum dan Sesudah Modifikasi
+
+### A. Eksekusi Skrip DDL Awal
+
+**Sebelum modifikasi:**
+
+![Query pembuatan tabel mahasiswa](./images/01_create_table_mahasiswa.png)
+![Query pembuatan tabel dosen dan mata kuliah](./images/02_create_table_dosen_mk.png)
+
+**Sesudah modifikasi / output eksekusi:**
+
+![Output sukses pembuatan tabel mahasiswa](./images/03_output_create_mahasiswa_success.png)
+![Output sukses pembuatan tabel dosen dan mata kuliah](./images/04_output_create_dosen_mk_success.png)
+
+### B. Modifikasi 1: Penambahan Kolom Email & Constraint pada `mahasiswa` dan `mata_kuliah`
+
+**Sebelum modifikasi (query):**
+
+![Query penambahan email mahasiswa](./images/05_query_add_email_mahasiswa.png)
+![Query constraint email dan angkatan](./images/07_query_add_chk_email_angkatan.png)
+![Query constraint SKS](./images/09_query_add_chk_sks.png)
+
+**Sesudah modifikasi (output sukses):**
+
+![Output penambahan email](./images/06_output_add_email_success.png)
+![Output constraint email dan angkatan](./images/08_output_add_chk_email_angkatan_success.png)
+![Output constraint SKS](./images/10_output_add_chk_sks_success.png)
+
+### C. Modifikasi 2: Penambahan Status Persetujuan & Constraint Semester pada `krs`
+
+**Sebelum modifikasi (query):**
+
+![Query pembuatan tabel KRS](./images/11_query_create_table_krs.png)
+![Output sukses pembuatan tabel KRS](./images/12_output_create_table_krs_success.png)
+![Query constraint semester dan status](./images/13_query_add_chk_semester_status.png)
+
+**Sesudah modifikasi (output sukses):**
+
+![Output constraint semester dan status](./images/14_output_add_chk_semester_status_success.png)
+
+## 5. Error, Penyebab, dan Langkah Perbaikannya
+
+**Pesan error yang muncul:**
+
+`#1050 - Table 'krs' already exists`
+
+*(Serta kemunculan Static Analysis Error/Linter phpMyAdmin pada klausa `CHECK`.)*
+
+**Penyebab:** MySQL menolak pembuatan tabel `krs` karena tabel dengan nama tersebut sudah pernah dibuat sebelumnya di dalam database akademik. Selain itu, terjadi bentrok visual parser (Static Analysis/Linter) pada editor phpMyAdmin saat membaca kata kunci `CHECK` tanpa nama constraint eksplisit.
+
+**Langkah perbaikan:**
+
+- Jalankan perintah `DROP TABLE IF EXISTS krs;` terlebih dahulu untuk menghapus struktur tabel lama sebelum mengeksekusi ulang skrip pembuatan tabel.
+- Gunakan klausa `CREATE TABLE IF NOT EXISTS krs` agar query pembuatan tabel diabaikan secara aman jika tabel sudah ada di database.
+- Untuk penulisan `CHECK`, tambahkan nama constraint secara eksplisit seperti `CONSTRAINT chk_semester CHECK (...)` untuk menghindari kesalahan pembacaan parser pada phpMyAdmin.
